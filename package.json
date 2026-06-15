@@ -1,0 +1,24 @@
+{
+  "name": "opencode-status-light",
+  "version": "0.1.0",
+  "description": "Ubuntu floating status bar for opencode runtime state and account quota.",
+  "type": "module",
+  "files": [
+    "plugin/",
+    "scripts/",
+    "status-light.py",
+    "README.md"
+  ],
+  "scripts": {
+    "install:local": "node scripts/install.mjs",
+    "uninstall:local": "node scripts/uninstall.mjs",
+    "check": "python3 -m py_compile status-light.py && node scripts/check.mjs"
+  },
+  "keywords": [
+    "opencode",
+    "gtk",
+    "status",
+    "quota"
+  ],
+  "license": "MIT"
+}
