@@ -121,15 +121,40 @@ async function writeStatus(status: Status) {
 }
 
 function platformSummary(platform: string, output: string) {
+  const extractPercent = (text: string) => {
+    const prefixed = text.match(/(?:剩余|remaining)\s*(\d+)%/i)?.[1]
+    if (prefixed) return prefixed
+
+    const suffixed = text.match(/(\d+)%\s*remaining/i)?.[1]
+    if (suffixed) return suffixed
+
+    return text.match(/(\d+)%/)?.[1]
+  }
+
   const account = output.match(/Account:\s*(.+)/)?.[1]?.trim()
-  const remaining = output.match(/(?:剩余|remaining)\s*(\d+)%|(?:\d+)%\s*remaining/i)
-  const fallbackRemaining = output.match(/(\d+)%/)
-  const percent = remaining?.[1] ?? fallbackRemaining?.[1]
+  const percent = extractPercent(output)
+  const lines = output.split(/\r?\n/).map((line) => line.trim())
+  let weeklyPercent: number | undefined
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    const linePercent = extractPercent(line)
+    if (!linePercent) continue
+
+    const heading = lines.slice(0, index).reverse().find(Boolean)
+    if (!heading) continue
+    if (!/(?:7\s*(?:天|day|days)|周)/i.test(heading)) continue
+
+    weeklyPercent = Number(linePercent)
+    break
+  }
+
   return {
     platform,
     account,
     remainingPercent: percent ? Number(percent) : undefined,
-    summary: `${platform}${percent ? ` ${percent}%` : ""}${account ? ` ${account}` : ""}`,
+    weeklyRemainingPercent: weeklyPercent,
+    summary: `${platform}${percent ? ` ${percent}%` : ""}${weeklyPercent !== undefined ? ` 周${weeklyPercent}%` : ""}${account ? ` ${account}` : ""}`,
   }
 }
 
