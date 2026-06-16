@@ -133,21 +133,8 @@ function platformSummary(platform: string, output: string) {
 
   const account = output.match(/Account:\s*(.+)/)?.[1]?.trim()
   const percent = extractPercent(output)
-  const lines = output.split(/\r?\n/).map((line) => line.trim())
-  let weeklyPercent: number | undefined
-
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index]
-    const linePercent = extractPercent(line)
-    if (!linePercent) continue
-
-    const heading = lines.slice(0, index).reverse().find(Boolean)
-    if (!heading) continue
-    if (!/(?:7\s*(?:天|day|days)|周)/i.test(heading)) continue
-
-    weeklyPercent = Number(linePercent)
-    break
-  }
+  const weeklySection = output.match(/(?:^|\n)\s*(?:7\s*[- ]?(?:day|days)|7天|周)[^\n]*(?:\n([\s\S]*?))?(?:\n\s*\n|$)/i)?.[1]
+  const weeklyPercent = weeklySection ? Number(extractPercent(weeklySection)) : undefined
 
   return {
     platform,
